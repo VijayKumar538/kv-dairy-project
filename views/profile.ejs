@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile - KV Dairy</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="/images/logo.png" alt="KV Dairy Logo" class="logo">
+            <h1>KV Dairy Products</h1>
+        </div>
+        <div class="header-right">
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+            </div>
+            <a href="/profile" class="profile-link">
+                <span><%= user.name || 'Profile' %></span>
+                <img src="<%= user.profilePhoto || '/images/profile-icon.png' %>" alt="Profile" class="profile-icon">
+            </a>
+            <a href="/logout" class="logout-link">Logout</a>
+        </div>
+    </header>
+
+    <div class="profile-container">
+        <h2>Your Profile</h2>
+        <div class="profile-photo-section">
+            <img src="<%= user.profilePhoto || '/images/profile-icon.png' %>" alt="Profile Photo" class="profile-photo">
+            <label for="profilePhoto" class="upload-btn">Change Photo</label>
+        </div>
+        <form action="/profile" method="POST" enctype="multipart/form-data">
+            <input type="file" name="profilePhoto" id="profilePhoto" accept="image/*" style="display: none;">
+            <input type="text" name="name" placeholder="Name" value="<%= user.name || '' %>">
+            <input type="tel" name="phone" placeholder="Phone" value="<%= user.phone || '' %>">
+            <textarea name="address" placeholder="Address"><%= user.address || '' %></textarea>
+            <button type="submit" class="auth-btn">Save Profile</button>
+        </form>
+        <a href="/dashboard" class="back-btn">Back to Dashboard</a>
+    </div>
+
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+    <script src="/js/script.js"></script>
+</body>
+</html>

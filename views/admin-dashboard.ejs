@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard - KV Dairy</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="/images/logo.png" alt="KV Dairy Logo" class="logo">
+            <h1>KV Dairy Admin</h1>
+        </div>
+        <div class="header-right">
+            <a href="/logout" class="logout-link">Logout</a>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <h2 class="welcome-message">Admin Dashboard</h2>
+        
+        <div class="orders">
+            <h2>All Orders</h2>
+            <% if (orders.length === 0) { %>
+                <p class="empty-cart">No orders found.</p>
+            <% } else { %>
+                <table class="orders-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Date</th>
+                            <th>Products</th>
+                            <th>Total</th>
+                            <th>Address</th>
+                            <th>Payment Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% orders.forEach(order => { %>
+                            <tr>
+                                <td><%= order.userName %> (<%= order.userEmail %>)</td>
+                                <td><%= order.date.toLocaleDateString() || 'Invalid Date' %></td>
+                                <td>
+                                    <% order.products.forEach(product => { %>
+                                        <p><%= product.name %> - <%= product.quantity %> x ₹<%= product.price %></p>
+                                    <% }) %>
+                                </td>
+                                <td>₹<%= order.total %></td>
+                                <td><%= order.address %></td>
+                                <td class="<%= order.paymentStatus === 'Paid' ? 'status-paid' : 'status-not-paid' %>">
+                                    <%= order.paymentStatus %>
+                                </td>
+                                <td>
+                                    <form action="/admin/update-payment/<%= order.userId %>/<%= order._id %>" method="POST">
+                                        <select name="paymentStatus">
+                                            <option value="Not Paid" <%= order.paymentStatus === 'Not Paid' ? 'selected' : '' %>>Not Paid</option>
+                                            <option value="Paid" <%= order.paymentStatus === 'Paid' ? 'selected' : '' %>>Paid</option>
+                                        </select>
+                                        <button type="submit" class="update-btn">Update</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        <% }) %>
+                    </tbody>
+                </table>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+    <script src="/js/script.js"></script>
+    <script>
+        console.log('Orders passed to template:', <%- JSON.stringify(orders) %>);
+    </script>
+</body>
+</html>

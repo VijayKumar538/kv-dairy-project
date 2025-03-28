@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>KV Dairy Dashboard</title>
+    <link rel="stylesheet" href="/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="main-header">
+        <div class="header-left">
+            <img src="/images/logo.png" alt="KV Dairy Logo" class="logo">
+            <h1>KV Dairy Products</h1>
+        </div>
+        <div class="header-right">
+            <div class="search-bar">
+                <input type="text" placeholder="Search products...">
+            </div>
+            <a href="/profile" class="profile-link">
+                <span><%= user.name || 'Profile' %></span>
+                <img src="<%= user.profilePhoto || '/images/profile-icon.png' %>" alt="Profile" class="profile-icon">
+            </a>
+            <a href="/logout" class="logout-link">Logout</a>
+        </div>
+    </header>
+
+    <div class="dashboard">
+        <h2 class="welcome-message">Welcome to KV Dairy Products</h2>
+        
+        <div class="products">
+            <div class="product-card">
+                <img src="/images/milk.jpg" alt="Milk">
+                <h3>Milk</h3>
+                <p>₹50/liter</p>
+                <div class="product-controls">
+                    <input type="number" min="0" class="quantity" data-price="50" value="0">
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+            <div class="product-card">
+                <img src="/images/curd.jpg" alt="Curd">
+                <h3>Curd</h3>
+                <p>₹30/500g</p>
+                <div class="product-controls">
+                    <input type="number" min="0" class="quantity" data-price="30" value="0">
+                    <button class="add-to-cart">Add to Cart</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="cart">
+            <h2>Cart</h2>
+            <div id="cart-items"></div>
+            <div class="cart-summary">
+                <h3>Order Summary</h3>
+                <p>Total Items: <span id="total-items">0</span></p>
+                <p>Total Amount: ₹<span id="total-amount">0</span></p>
+                <input type="text" id="delivery-address" placeholder="Delivery Address" value="<%= user.address || '' %>">
+                <button id="place-order">Place Order</button>
+            </div>
+        </div>
+
+        <div class="orders">
+            <h2>Last 30 Days Orders</h2>
+            <p>Total Amount (Unpaid): ₹<%= totalAmount %></p>
+            <% if (recentOrders.length === 0) { %>
+                <p>No orders in the last 30 days.</p>
+            <% } else { %>
+                <% recentOrders.forEach(order => { %>
+                    <div class="order">
+                        <p>Date: <%= order.date.toLocaleDateString() || 'Invalid Date' %></p>
+                        <p>Total: ₹<%= order.total %></p>
+                        <p>Payment Status: 
+                            <span class="<%= order.paymentStatus === 'Paid' ? 'status-paid' : 'status-not-paid' %>">
+                                <%= order.paymentStatus %>
+                            </span>
+                        </p>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div>
+    </div>
+
+    <div class="loading-spinner" id="loading-spinner">
+        <div class="spinner"></div>
+    </div>
+    <script src="/js/script.js"></script>
+</body>
+</html>
