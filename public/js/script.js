@@ -112,6 +112,18 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartDisplay();
     };
 
+    // Sorting function
+    window.sortOrders = (sortBy) => {
+        showLoadingSpinner();
+        const url = new URL(window.location.href);
+        if (sortBy) {
+            url.searchParams.set('sortBy', sortBy);
+        } else {
+            url.searchParams.delete('sortBy');
+        }
+        window.location.href = url.toString();
+    };
+
     window.removeFromCart = (index) => {
         cart.splice(index, 1);
         updateCartDisplay();
