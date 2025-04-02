@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const app = express();
 
-mongoose.connect('mongodb://localhost/kv_dairy', { 
+mongoose.connect('mongodb+srv://vijayreddy4469:f1DZPpXDv7c7OnU3@kv-dairy-farms.wclswpu.mongodb.net/kv_dairy?retryWrites=true&w=majority&appName=kv-dairy-farms', { 
     useNewUrlParser: true, 
     useUnifiedTopology: true 
 }).then(() => {
