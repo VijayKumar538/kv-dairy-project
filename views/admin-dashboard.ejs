@@ -18,7 +18,32 @@
 
     <div class="dashboard">
         <h2 class="welcome-message">Admin Dashboard</h2>
-        
+
+        <div class="orders">
+            <h2>All Orders</h2>
+            <div class="sort-controls">
+                <label for="sort-orders">Sort by: </label>
+                <select id="sort-orders" onchange="sortOrders(this.value)">
+                    <option value="">Default</option>
+                    <option value="date-asc">Date (Oldest First)</option>
+                    <option value="date-desc">Date (Newest First)</option>
+                    <option value="product-asc">Product (A-Z)</option>
+                    <option value="product-desc">Product (Z-A)</option>
+                    <option value="paid">Paid First</option>
+                    <option value="unpaid">Unpaid First</option>
+                    <option value="user-asc">User (A-Z)</option>
+                    <option value="user-desc">User (Z-A)</option>
+                </select>
+            </div>
+            <% if (orders.length === 0) { %>
+                <p class="empty-cart">No orders found.</p>
+            <% } else { %>
+                <table class="orders-table">
+                    <!-- Table content remains the same -->
+                </table>
+            <% } %>
+        </div>
+
         <div class="orders">
             <h2>All Orders</h2>
             <% if (orders.length === 0) { %>
