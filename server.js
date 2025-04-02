@@ -218,27 +218,60 @@ app.post('/profile', upload.single('profilePhoto'), async (req, res) => {
 });
 
 app.post('/order', async (req, res) => {
-    if (!req.session.user) return res.redirect('/');
+    if (!req.session.user) {
+        console.log('No user in session, redirecting to login');
+        return res.redirect('/');
+    }
+
+    // Fetch the latest user data from the database
+    const user = await User.findById(req.session.user._id);
+    if (!user) {
+        console.log('User not found in database, destroying session');
+        req.session.destroy();
+        return res.redirect('/');
+    }
+
+    // Log the user data for debugging
+    console.log('User data from DB:', {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+        phone: user.phone
+    });
+
+    // Check if mandatory profile details (name and phone) are updated
+    if (!user.name || !user.phone) {
+        console.log('Profile incomplete: name or phone missing');
+        return res.status(400).json({
+            success: false,
+            message: 'Please update your profile with name and mobile number before placing an order.'
+        });
+    }
+
     const { products, address } = req.body;
-    console.log('Placing order for user:', req.session.user.email);
+    console.log('Placing order for user:', user.email);
     console.log('Order details:', { products, address });
 
     const total = products.reduce((sum, item) => sum + (item.quantity * item.price), 0);
-    
-    const user = await User.findByIdAndUpdate(req.session.user._id, {
-        $push: {
-            orders: {
-                products,
-                date: new Date(),
-                address,
-                total,
-                paymentStatus: 'Not Paid' // Updated to "Not Paid"
+
+    const updatedUser = await User.findByIdAndUpdate(
+        req.session.user._id,
+        {
+            $push: {
+                orders: {
+                    products,
+                    date: new Date(),
+                    address,
+                    total,
+                    paymentStatus: 'Not Paid'
+                }
             }
-        }
-    }, { new: true });
-    
-    console.log('Updated user with new order:', user);
-    req.session.user = user;
+        },
+        { new: true }
+    );
+
+    console.log('Updated user with new order:', updatedUser);
+    req.session.user = updatedUser; // Update session with latest data
     res.json({ success: true });
 });
 
