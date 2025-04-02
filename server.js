@@ -6,7 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const app = express();
 
-mongoose.connect('mongodb+srv://vijayreddy4469:f1DZPpXDv7c7OnU3@kv-dairy-farms.wclswpu.mongodb.net/kv_dairy?retryWrites=true&w=majority&appName=kv-dairy-farms', { 
+mongoose.connect('mongodb://localhost:/kv-dairy', { 
     useNewUrlParser: true, 
     useUnifiedTopology: true 
 }).then(() => {
@@ -145,32 +145,52 @@ app.post('/login', async (req, res) => {
 app.get('/dashboard', async (req, res) => {
     if (!req.session.user) return res.redirect('/');
     if (req.session.user.role === 'admin') return res.redirect('/admin/dashboard');
-    
-    // Fetch the latest user data from the database
+
     const user = await User.findById(req.session.user._id).lean();
     if (!user) {
         req.session.destroy();
         return res.redirect('/');
     }
-    req.session.user = user; // Update the session with the latest data
-    
+    req.session.user = user;
+
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const recentOrders = user.orders
+
+    let recentOrders = user.orders
         .filter(order => new Date(order.date) > thirtyDaysAgo)
         .map(order => ({
             ...order,
             date: new Date(order.date)
         }));
-    console.log('Recent orders:', recentOrders);
-    
-    // Calculate total amount, excluding paid orders
+
+    // Sorting logic
+    const { sortBy } = req.query;
+    if (sortBy) {
+        switch (sortBy) {
+            case 'date-asc':
+                recentOrders.sort((a, b) => a.date - b.date);
+                break;
+            case 'date-desc':
+                recentOrders.sort((a, b) => b.date - a.date);
+                break;
+            case 'product-asc':
+                recentOrders.sort((a, b) => a.products[0]?.name.localeCompare(b.products[0]?.name));
+                break;
+            case 'product-desc':
+                recentOrders.sort((a, b) => b.products[0]?.name.localeCompare(a.products[0]?.name));
+                break;
+            case 'paid':
+                recentOrders.sort((a, b) => a.paymentStatus === 'Paid' ? -1 : 1);
+                break;
+            case 'unpaid':
+                recentOrders.sort((a, b) => a.paymentStatus === 'Not Paid' ? -1 : 1);
+                break;
+        }
+    }
+
     const unpaidOrders = recentOrders.filter(order => order.paymentStatus === 'Not Paid');
-    console.log('Unpaid orders:', unpaidOrders);
     const totalAmount = unpaidOrders.reduce((sum, order) => sum + order.total, 0);
-    console.log('Total unpaid amount:', totalAmount);
-    
+
     res.render('dashboard', { 
         user: req.session.user,
         recentOrders,
@@ -255,7 +275,7 @@ app.post('/admin/login', async (req, res) => {
 
 app.get('/admin/dashboard', isAdmin, async (req, res) => {
     const users = await User.find({ role: 'user' }).lean();
-    const allOrders = users.flatMap(user => 
+    let allOrders = users.flatMap(user => 
         user.orders.map(order => ({
             ...order,
             userId: user._id,
@@ -263,7 +283,38 @@ app.get('/admin/dashboard', isAdmin, async (req, res) => {
             userName: user.name || 'Unknown'
         }))
     );
-    
+
+    // Sorting logic
+    const { sortBy } = req.query;
+    if (sortBy) {
+        switch (sortBy) {
+            case 'date-asc':
+                allOrders.sort((a, b) => new Date(a.date) - new Date(b.date));
+                break;
+            case 'date-desc':
+                allOrders.sort((a, b) => new Date(b.date) - new Date(a.date));
+                break;
+            case 'product-asc':
+                allOrders.sort((a, b) => a.products[0]?.name.localeCompare(b.products[0]?.name));
+                break;
+            case 'product-desc':
+                allOrders.sort((a, b) => b.products[0]?.name.localeCompare(a.products[0]?.name));
+                break;
+            case 'paid':
+                allOrders.sort((a, b) => a.paymentStatus === 'Paid' ? -1 : 1);
+                break;
+            case 'unpaid':
+                allOrders.sort((a, b) => a.paymentStatus === 'Not Paid' ? -1 : 1);
+                break;
+            case 'user-asc':
+                allOrders.sort((a, b) => a.userName.localeCompare(b.userName));
+                break;
+            case 'user-desc':
+                allOrders.sort((a, b) => b.userName.localeCompare(a.userName));
+                break;
+        }
+    }
+
     res.render('admin-dashboard', { orders: allOrders });
 });
 
