@@ -61,6 +61,18 @@
 
         <div class="orders">
             <h2>Last 30 Days Orders</h2>
+            <div class="sort-controls">
+                <label for="sort-orders">Sort by: </label>
+                <select id="sort-orders" onchange="sortOrders(this.value)">
+                    <option value="">Default</option>
+                    <option value="date-asc">Date (Oldest First)</option>
+                    <option value="date-desc">Date (Newest First)</option>
+                    <option value="product-asc">Product (A-Z)</option>
+                    <option value="product-desc">Product (Z-A)</option>
+                    <option value="paid">Paid First</option>
+                    <option value="unpaid">Unpaid First</option>
+                </select>
+            </div>
             <p>Total Amount (Unpaid): ₹<%= totalAmount %></p>
             <% if (recentOrders.length === 0) { %>
                 <p>No orders in the last 30 days.</p>
@@ -78,6 +90,26 @@
                 <% }) %>
             <% } %>
         </div>
+
+        <!-- <div class="orders">
+            <h2>Last 30 Days Orders</h2>
+            <p>Total Amount (Unpaid): ₹<%= totalAmount %></p>
+            <% if (recentOrders.length === 0) { %>
+                <p>No orders in the last 30 days.</p>
+            <% } else { %>
+                <% recentOrders.forEach(order => { %>
+                    <div class="order">
+                        <p>Date: <%= order.date.toLocaleDateString() || 'Invalid Date' %></p>
+                        <p>Total: ₹<%= order.total %></p>
+                        <p>Payment Status: 
+                            <span class="<%= order.paymentStatus === 'Paid' ? 'status-paid' : 'status-not-paid' %>">
+                                <%= order.paymentStatus %>
+                            </span>
+                        </p>
+                    </div>
+                <% }) %>
+            <% } %>
+        </div> -->
     </div>
 
     <div class="loading-spinner" id="loading-spinner">
