@@ -1,7 +1,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     let cart = [];
 
-    // Add to Cart functionality
+    // Add to Cart functionality (unchanged)
     document.querySelectorAll('.add-to-cart').forEach(button => {
         button.addEventListener('click', (e) => {
             const productDiv = e.target.closest('.product-card');
@@ -22,12 +22,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Place Order functionality
     document.getElementById('place-order')?.addEventListener('click', () => {
         if (cart.length === 0) return alert('Your cart is empty!');
         const address = document.getElementById('delivery-address').value;
         if (!address) return alert('Please provide a delivery address.');
-
+    
         showLoadingSpinner();
         fetch('/order', {
             method: 'POST',
@@ -36,15 +35,29 @@ document.addEventListener('DOMContentLoaded', () => {
         })
         .then(response => response.json())
         .then(data => {
+            hideLoadingSpinner();
             if (data.success) {
                 cart = [];
                 updateCartDisplay();
                 location.reload();
+            } else {
+                if (data.message) {
+                    if (confirm(`${data.message} Would you like to update your profile now?`)) {
+                        window.location.href = '/profile';
+                    }
+                } else {
+                    alert('An error occurred while placing the order.');
+                }
             }
+        })
+        .catch(error => {
+            hideLoadingSpinner();
+            console.error('Error placing order:', error);
+            alert('An error occurred while placing the order.');
         });
     });
 
-    // Update Cart Display
+    // Update Cart Display (unchanged)
     function updateCartDisplay() {
         const cartItems = document.getElementById('cart-items');
         const totalItemsEl = document.getElementById('total-items');
@@ -79,18 +92,18 @@ document.addEventListener('DOMContentLoaded', () => {
         totalAmountEl.textContent = totalAmount;
     }
 
-    // Page Transition Handling
+    // Page Transition Handling (unchanged)
     document.querySelectorAll('a').forEach(link => {
         link.addEventListener('click', (e) => {
             e.preventDefault();
             showLoadingSpinner();
             setTimeout(() => {
                 window.location.href = link.href;
-            }, 500); // Simulate a delay for the loading spinner
+            }, 500);
         });
     });
 
-    // Form Submission Handling
+    // Form Submission Handling (unchanged)
     document.querySelectorAll('form').forEach(form => {
         form.addEventListener('submit', (e) => {
             showLoadingSpinner();
@@ -103,6 +116,11 @@ document.addEventListener('DOMContentLoaded', () => {
         spinner.style.display = 'flex';
     }
 
+    function hideLoadingSpinner() {
+        const spinner = document.getElementById('loading-spinner');
+        spinner.style.display = 'none';
+    }
+
     // Expose functions to global scope
     window.updateQuantity = (index, change) => {
         cart[index].quantity += change;
@@ -112,7 +130,12 @@ document.addEventListener('DOMContentLoaded', () => {
         updateCartDisplay();
     };
 
-    // Sorting function
+    window.removeFromCart = (index) => {
+        cart.splice(index, 1);
+        updateCartDisplay();
+    };
+
+    // Sorting function (if previously added)
     window.sortOrders = (sortBy) => {
         showLoadingSpinner();
         const url = new URL(window.location.href);
@@ -122,10 +145,5 @@ document.addEventListener('DOMContentLoaded', () => {
             url.searchParams.delete('sortBy');
         }
         window.location.href = url.toString();
-    };
-
-    window.removeFromCart = (index) => {
-        cart.splice(index, 1);
-        updateCartDisplay();
     };
 });
